@@ -4,12 +4,14 @@ export const generalConfig = {
     maxGas: 7,
     maxAddressTxCount: 10,
     maxTxPerRun: 3,
+    shuffleModules: false,
     modules: [
         'base_bridge',
         'zora_bridge',
         'zk_bridge',
         'starknet_bridge',
-        'transfer'
+        'transfer',
+        'bungee_refuel'
     ]
 }
 
@@ -36,4 +38,9 @@ export const starknetBridgeConfig = {
 export const transferConfig = {
     percentSendFrom: 85,
     percentSendTo: 90
+}
+
+export const bungeeBridgeConfig = {
+    refuelFrom: 0.00001,
+    refuelTo: 0.00002
 }

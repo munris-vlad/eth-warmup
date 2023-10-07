@@ -1,6 +1,6 @@
 import { privateKeyConvert, readWallets } from "./utils/wallet"
 import { random, randomFloat, shuffle, sleep } from "./utils/common"
-import { baseBridgeConfig, generalConfig, transferConfig, zkBridgeConfig, zoraBridgeConfig } from "./config"
+import { baseBridgeConfig, bungeeBridgeConfig, generalConfig, transferConfig, zkBridgeConfig, zoraBridgeConfig } from "./config"
 import { makeLogger } from "./utils/logger"
 import { entryPoint } from "./utils/menu"
 import { BaseBridge } from "./modules/baseBridge"
@@ -11,6 +11,7 @@ import { getEthWalletClient, getPublicEthClient } from "./utils/ethClient"
 import { ZoraBridge } from "./modules/zoraBridge"
 import { StarknetBridge } from "./modules/starknetBridge"
 import { Transfer } from "./modules/transfer"
+import { BungeeRefuel } from "./modules/bungee"
 
 let privateKeys = readWallets('./private_keys.txt')
 
@@ -124,12 +125,36 @@ async function transferModule() {
     }
 }
 
+async function bungeeModule() {
+    const logger = makeLogger("Bungee")
+    for (let privateKey of privateKeys) {
+        const wallet = getEthWalletClient(privateKeyConvert(privateKey))
+        if (await getAddressTxCount(wallet.account.address) >= generalConfig.maxAddressTxCount) {
+            logger.info(`Address ${wallet.account.address} has ${generalConfig.maxAddressTxCount} or more transactions, skip`)
+            continue
+        }
+
+        const bungee = new BungeeRefuel(privateKeyConvert(privateKey))
+        const sum = randomFloat(bungeeBridgeConfig.refuelFrom, bungeeBridgeConfig.refuelTo)
+        if (await waitGas()) {
+            await bungee.refuel(sum.toString())
+        }
+        
+        const sleepTime = random(generalConfig.sleepFrom, generalConfig.sleepTo)
+        logger.info(`Waiting ${sleepTime} sec until next wallet...`)
+        await sleep(sleepTime * 1000)
+    }
+}
+
 async function randomModule() {
     const logger = makeLogger("Random")
     for (let privateKey of privateKeys) {
         const wallet = getEthWalletClient(privateKeyConvert(privateKey))
         let modules = generalConfig.modules
-        shuffle(modules)
+
+        if (generalConfig.shuffleModules) {
+            shuffle(modules)
+        }
 
         for (let i = 0; i < generalConfig.maxTxPerRun; i++) {
             if (await getAddressTxCount(wallet.account.address) >= generalConfig.maxAddressTxCount) {
@@ -158,6 +183,14 @@ async function randomModule() {
                 const sum = randomFloat(zkBridgeConfig.bridgeFrom, zkBridgeConfig.bridgeTo)
                 if (await waitGas()) {
                     await bridge.bridge(sum.toString())
+                }
+            }
+
+            if (modules[i] == 'bungee_refuel') {
+                const bungee = new BungeeRefuel(privateKeyConvert(privateKey))
+                const sum = randomFloat(bungeeBridgeConfig.refuelFrom, bungeeBridgeConfig.refuelTo)
+                if (await waitGas()) {
+                    await bungee.refuel(sum.toString())
                 }
             }
             
@@ -192,6 +225,9 @@ async function startMenu() {
             break
         case "transfer":
             await transferModule()
+            break
+        case "bungee":
+            await bungeeModule()
             break
     }
 }

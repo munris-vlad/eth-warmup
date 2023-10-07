@@ -31,6 +31,10 @@ export const entryPoint = async () => {
                     name: "Transfer",
                     value: "transfer",
                 },
+                {
+                    name: "Bungee",
+                    value: "bungee",
+                },
             ],
             loop: false,
         },
