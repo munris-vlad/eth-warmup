@@ -13,7 +13,7 @@ export class Transfer {
         this.wallet = getEthWalletClient(privateKey)
     }
 
-    async bridge(amount: bigint, recipient: Hex) {
+    async transfer(amount: bigint, recipient: Hex) {
         this.logger.info(`${this.wallet.account.address} | Transfer ETH`)
         
         try {

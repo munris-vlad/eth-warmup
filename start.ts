@@ -112,12 +112,12 @@ async function transferModule() {
             continue
         }
 
-        const bridge = new Transfer(privateKeyConvert(privateKey))
+        const transfer = new Transfer(privateKeyConvert(privateKey))
         const randomPercent: number = random(transferConfig.percentSendFrom, transferConfig.percentSendTo) / 100
         const ethBalance: bigint = await client.getBalance({ address: wallet.account.address })
         let amount: bigint = BigInt(Math.round(Number(ethBalance) * randomPercent))
         if (await waitGas()) {
-            await bridge.bridge(amount, privateKeyConvert(addresses[index]))
+            await transfer.transfer(amount, privateKeyConvert(addresses[index]))
         }
         
         const sleepTime = random(generalConfig.sleepFrom, generalConfig.sleepTo)
@@ -169,7 +169,7 @@ async function mintfunModule() {
 
 async function randomModule() {
     const logger = makeLogger("Random")
-    for (let privateKey of privateKeys) {
+    for (const [index, privateKey] of privateKeys.entries()) {
         const wallet = getEthWalletClient(privateKeyConvert(privateKey))
         let modules = generalConfig.modules
 
@@ -207,6 +207,15 @@ async function randomModule() {
                 }
             }
 
+            if (modules[i] == 'starknet_bridge') {
+                const starknetAddresses = readWallets('./addresses_starknet.txt')
+                const bridge = new StarknetBridge(privateKeyConvert(privateKey), starknetAddresses[index])
+                const sum = randomFloat(zkBridgeConfig.bridgeFrom, zkBridgeConfig.bridgeTo)
+                if (await waitGas()) {
+                    await bridge.bridge(sum.toString())
+                }
+            }
+
             if (modules[i] == 'bungee_refuel') {
                 const bungee = new BungeeRefuel(privateKeyConvert(privateKey))
                 const sum = randomFloat(bungeeBridgeConfig.refuelFrom, bungeeBridgeConfig.refuelTo)
@@ -221,6 +230,20 @@ async function randomModule() {
                     await bungee.mint()
                 }
             }
+
+            if (modules[i] == 'mintfun') {
+                const addresses = readWallets('./addresses_evm.txt')
+                const client = getPublicEthClient()
+                const transfer = new Transfer(privateKeyConvert(privateKey))
+                const randomPercent: number = random(transferConfig.percentSendFrom, transferConfig.percentSendTo) / 100
+                const ethBalance: bigint = await client.getBalance({ address: wallet.account.address })
+                let amount: bigint = BigInt(Math.round(Number(ethBalance) * randomPercent))
+                if (await waitGas()) {
+                    await transfer.transfer(amount, privateKeyConvert(addresses[index]))
+                }
+            }
+
+            
             
             const sleepTime = random(generalConfig.sleepFrom, generalConfig.sleepTo)
             logger.info(`Waiting ${sleepTime} sec until next action...`)

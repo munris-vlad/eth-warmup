@@ -10,7 +10,7 @@ export class Mintfun {
     randomContract:Hex
     contracts: Array<Hex> = [
         '0xF639B4EbB77DF1ed4b5014C244F60E72B8AdB29b',
-        '0x932261f9Fc8DA46C4a22e31B45c4De60623848bF',
+        // '0x932261f9Fc8DA46C4a22e31B45c4De60623848bF',
     ]
     logger: any
     wallet: any
