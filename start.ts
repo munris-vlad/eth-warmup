@@ -216,7 +216,7 @@ async function randomModule() {
                 }
             }
 
-            if (modules[i] == 'bungee_refuel') {
+            if (modules[i] == 'bungee') {
                 const bungee = new BungeeRefuel(privateKeyConvert(privateKey))
                 const sum = randomFloat(bungeeBridgeConfig.refuelFrom, bungeeBridgeConfig.refuelTo)
                 if (await waitGas()) {
@@ -242,8 +242,6 @@ async function randomModule() {
                     await transfer.transfer(amount, privateKeyConvert(addresses[index]))
                 }
             }
-
-            
             
             const sleepTime = random(generalConfig.sleepFrom, generalConfig.sleepTo)
             logger.info(`Waiting ${sleepTime} sec until next action...`)
