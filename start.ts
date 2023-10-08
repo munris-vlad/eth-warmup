@@ -225,13 +225,13 @@ async function randomModule() {
             }
 
             if (modules[i] == 'mintfun') {
-                const bungee = new Mintfun(privateKeyConvert(privateKey))
+                const mintfun = new Mintfun(privateKeyConvert(privateKey))
                 if (await waitGas()) {
-                    await bungee.mint()
+                    await mintfun.mint()
                 }
             }
 
-            if (modules[i] == 'mintfun') {
+            if (modules[i] == 'transfer') {
                 const addresses = readWallets('./addresses_evm.txt')
                 const client = getPublicEthClient()
                 const transfer = new Transfer(privateKeyConvert(privateKey))
