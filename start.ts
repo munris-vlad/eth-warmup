@@ -12,6 +12,7 @@ import { ZoraBridge } from "./modules/zoraBridge"
 import { StarknetBridge } from "./modules/starknetBridge"
 import { Transfer } from "./modules/transfer"
 import { BungeeRefuel } from "./modules/bungee"
+import { Mintfun } from "./modules/mintfun"
 
 let privateKeys = readWallets('./private_keys.txt')
 
@@ -146,6 +147,26 @@ async function bungeeModule() {
     }
 }
 
+async function mintfunModule() {
+    const logger = makeLogger("Mintfun")
+    for (let privateKey of privateKeys) {
+        const wallet = getEthWalletClient(privateKeyConvert(privateKey))
+        if (await getAddressTxCount(wallet.account.address) >= generalConfig.maxAddressTxCount) {
+            logger.info(`Address ${wallet.account.address} has ${generalConfig.maxAddressTxCount} or more transactions, skip`)
+            continue
+        }
+
+        const bungee = new Mintfun(privateKeyConvert(privateKey))
+        if (await waitGas()) {
+            await bungee.mint()
+        }
+        
+        const sleepTime = random(generalConfig.sleepFrom, generalConfig.sleepTo)
+        logger.info(`Waiting ${sleepTime} sec until next wallet...`)
+        await sleep(sleepTime * 1000)
+    }
+}
+
 async function randomModule() {
     const logger = makeLogger("Random")
     for (let privateKey of privateKeys) {
@@ -193,6 +214,13 @@ async function randomModule() {
                     await bungee.refuel(sum.toString())
                 }
             }
+
+            if (modules[i] == 'mintfun') {
+                const bungee = new Mintfun(privateKeyConvert(privateKey))
+                if (await waitGas()) {
+                    await bungee.mint()
+                }
+            }
             
             const sleepTime = random(generalConfig.sleepFrom, generalConfig.sleepTo)
             logger.info(`Waiting ${sleepTime} sec until next action...`)
@@ -228,6 +256,9 @@ async function startMenu() {
             break
         case "bungee":
             await bungeeModule()
+            break
+        case "mintfun":
+            await mintfunModule()
             break
     }
 }

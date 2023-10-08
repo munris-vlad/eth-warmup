@@ -11,7 +11,8 @@ export const generalConfig = {
         'zk_bridge',
         'starknet_bridge',
         'transfer',
-        'bungee_refuel'
+        'bungee_refuel',
+        'mintfun'
     ]
 }
 

@@ -35,6 +35,10 @@ export const entryPoint = async () => {
                     name: "Bungee",
                     value: "bungee",
                 },
+                {
+                    name: "Mintfun",
+                    value: "mintfun",
+                },
             ],
             loop: false,
         },
