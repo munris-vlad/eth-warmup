@@ -3,7 +3,7 @@ import { getEthWalletClient, getPublicEthClient } from "../utils/ethClient"
 import { zoraBridgeAbi } from "../data/abi/zora-bridge"
 import { makeLogger } from "../utils/logger"
 import { bungeeAbi } from "../data/abi/bungee"
-import { random } from "../utils/common"
+import { random, sleep } from "../utils/common"
 
 export class BungeeRefuel {
     privateKey: Hex
@@ -31,22 +31,35 @@ export class BungeeRefuel {
 
         this.logger.info(`${this.wallet.account.address} | Bungee refuel ${amount} ETH`)
         
-        try {
-            const txHash = await this.wallet.writeContract({
-                address: this.bungeeContractAddress,
-                abi: bungeeAbi,
-                functionName: 'depositNativeToken',
-                args: [
-                    this.randomNetwork,
-                    this.wallet.account.address,
-                ],
-                value: value
-            })
+        let isSuccess = false
+        let retryCount = 1
         
-            this.logger.info(`${this.wallet.account.address} | Bungee refuel done: https://etherscan.io/tx/${txHash}`)
-        } catch (e) {
-            console.log(e)
-            this.logger.error(`${this.wallet.account.address} | Bungee refuel error: ${e.shortMessage}`)
+        while (!isSuccess) {
+            try {
+                const txHash = await this.wallet.writeContract({
+                    address: this.bungeeContractAddress,
+                    abi: bungeeAbi,
+                    functionName: 'depositNativeToken',
+                    args: [
+                        this.randomNetwork,
+                        this.wallet.account.address,
+                    ],
+                    value: value
+                })
+                isSuccess = true
+                this.logger.info(`${this.wallet.account.address} | Bungee refuel done: https://etherscan.io/tx/${txHash}`)
+            } catch (e) {
+                this.logger.error(`${this.wallet.account.address} | Bungee refuel error: ${e.shortMessage}`)
+
+                if (retryCount <= 3) {
+                    this.logger.info(`${this.wallet.account.address} | Wait 30 sec and retry bridge ${retryCount}/3`)
+                    retryCount++
+                    await sleep(30 * 1000)
+                } else {
+                    isSuccess = true
+                    this.logger.info(`${this.wallet.account.address} | bridge unsuccessful, skip`)
+                }
+            }
         }
     }
 }

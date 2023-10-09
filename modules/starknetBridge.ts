@@ -3,7 +3,7 @@ import {formatEther, formatGwei, Hex, parseEther, toHex} from "viem"
 import { getEthWalletClient, getPublicEthClient } from "../utils/ethClient"
 import { zkBridgeAbi } from "../data/abi/zk-bridge"
 import { makeLogger } from "../utils/logger"
-import { random } from "../utils/common"
+import { random, sleep } from "../utils/common"
 import { starknetBridgeAbi } from "../data/abi/starknet-bridge"
 
 export class StarknetBridge {
@@ -49,21 +49,36 @@ export class StarknetBridge {
 
         this.logger.info(`${this.wallet.account.address} | Starknet bridge ${amount} ETH`)
         
-        try {
-            const txHash = await this.wallet.writeContract({
-                address: this.bridgeContractAddress,
-                abi: starknetBridgeAbi,
-                functionName: 'deposit',
-                args: [
-                    value,
-                    parseInt(this.starknetAddress, 16)
-                ],
-                value: BigInt(Number(value)+Number(gasL2))
-            })
+        let isSuccess = false
+        let retryCount = 1
         
-            this.logger.info(`${this.wallet.account.address} | Starknet bridge done: https://etherscan.io/tx/${txHash}`)
-        } catch (e) {
-            this.logger.error(`${this.wallet.account.address} | Starknet bridge error: ${e.shortMessage}`)
+        while (!isSuccess) {
+            try {
+                const txHash = await this.wallet.writeContract({
+                    address: this.bridgeContractAddress,
+                    abi: starknetBridgeAbi,
+                    functionName: 'deposit',
+                    args: [
+                        value,
+                        parseInt(this.starknetAddress, 16)
+                    ],
+                    value: BigInt(Number(value)+Number(gasL2))
+                })
+                isSuccess = true
+                
+                this.logger.info(`${this.wallet.account.address} | Starknet bridge done: https://etherscan.io/tx/${txHash}`)
+            } catch (e) {
+                this.logger.error(`${this.wallet.account.address} | Starknet bridge error: ${e.shortMessage}`)
+
+                if (retryCount <= 3) {
+                    this.logger.info(`${this.wallet.account.address} | Wait 30 sec and retry bridge ${retryCount}/3`)
+                    retryCount++
+                    await sleep(30 * 1000)
+                } else {
+                    isSuccess = true
+                    this.logger.info(`${this.wallet.account.address} | Bridge unsuccessful, skip`)
+                }
+            }
         }
     }
 }

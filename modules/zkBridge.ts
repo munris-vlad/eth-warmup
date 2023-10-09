@@ -2,7 +2,7 @@ import {formatEther, formatGwei, Hex, parseEther, toHex} from "viem"
 import { getEthWalletClient, getPublicEthClient } from "../utils/ethClient"
 import { zkBridgeAbi } from "../data/abi/zk-bridge"
 import { makeLogger } from "../utils/logger"
-import { random } from "../utils/common"
+import { random, sleep } from "../utils/common"
 
 export class ZkBridge {
     privateKey: Hex
@@ -42,27 +42,42 @@ export class ZkBridge {
         value = value + bridgeCost
 
         this.logger.info(`${this.wallet.account.address} | Zk bridge ${amount} ETH`)
+        let isSuccess = false
+        let retryCount = 1
         
-        try {
-            const txHash = await this.wallet.writeContract({
-                address: this.bridgeContractAddress,
-                abi: zkBridgeAbi,
-                functionName: 'requestL2Transaction',
-                args: [
-                    this.wallet.account.address,
-                    parseEther(amount),
-                    '0x',
-                    gasLimit,
-                    800,
-                    [],
-                    this.wallet.account.address
-                ],
-                value: value
-            })
-        
-            this.logger.info(`${this.wallet.account.address} | Zk bridge done: https://etherscan.io/tx/${txHash}`)
-        } catch (e) {
-            this.logger.error(`${this.wallet.account.address} | Zk bridge error: ${e.shortMessage}`)
+        while (!isSuccess) {
+            try {
+                const txHash = await this.wallet.writeContract({
+                    address: this.bridgeContractAddress,
+                    abi: zkBridgeAbi,
+                    functionName: 'requestL2Transaction',
+                    args: [
+                        this.wallet.account.address,
+                        parseEther(amount),
+                        '0x',
+                        gasLimit,
+                        800,
+                        [],
+                        this.wallet.account.address
+                    ],
+                    value: value
+                })
+                
+                isSuccess = true
+
+                this.logger.info(`${this.wallet.account.address} | Zk bridge done: https://etherscan.io/tx/${txHash}`)
+            } catch (e) {
+                this.logger.error(`${this.wallet.account.address} | Zk bridge error: ${e.shortMessage}`)
+
+                if (retryCount <= 3) {
+                    this.logger.info(`${this.wallet.account.address} | Wait 30 sec and retry bridge ${retryCount}/3`)
+                    retryCount++
+                    await sleep(30 * 1000)
+                } else {
+                    isSuccess = true
+                    this.logger.info(`${this.wallet.account.address} | Bridge unsuccessful, skip`)
+                }
+            }
         }
     }
 }

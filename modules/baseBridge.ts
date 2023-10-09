@@ -2,6 +2,7 @@ import {formatEther, Hex, parseEther, toHex} from "viem"
 import { getEthWalletClient, getPublicEthClient } from "../utils/ethClient"
 import { baseBridgeAbi } from "../data/abi/base-bridge"
 import { makeLogger } from "../utils/logger"
+import { sleep } from "../utils/common"
 
 export class BaseBridge {
     privateKey: Hex
@@ -28,18 +29,32 @@ export class BaseBridge {
             `0x${string}`
         ] = [this.wallet.account.address, value, BigInt(100000), false, '0x']
         
-        try {
-            const txHash = await this.wallet.writeContract({
-                address: this.bridgeContractAddress,
-                abi: baseBridgeAbi,
-                functionName: 'depositTransaction',
-                args: args,
-                value: value
-            })
+        let isSuccess = false
+        let retryCount = 1
         
-            this.logger.info(`${this.wallet.account.address} | Base bridge done: https://etherscan.io/tx/${txHash}`)
-        } catch (e) {
-            this.logger.error(`${this.wallet.account.address} | Base bridge error: ${e.shortMessage}`)
+        while (!isSuccess) {
+            try {
+                const txHash = await this.wallet.writeContract({
+                    address: this.bridgeContractAddress,
+                    abi: baseBridgeAbi,
+                    functionName: 'depositTransaction',
+                    args: args,
+                    value: value
+                })
+                isSuccess = true
+                this.logger.info(`${this.wallet.account.address} | Base bridge done: https://etherscan.io/tx/${txHash}`)
+            } catch (e) {
+                this.logger.error(`${this.wallet.account.address} | Base bridge error: ${e.shortMessage}`)
+
+                if (retryCount <= 3) {
+                    this.logger.info(`${this.wallet.account.address} | Wait 30 sec and retry bridge ${retryCount}/3`)
+                    retryCount++
+                    await sleep(30 * 1000)
+                } else {
+                    isSuccess = true
+                    this.logger.info(`${this.wallet.account.address} | bridge unsuccessful, skip`)
+                }
+            }
         }
     }
 }

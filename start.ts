@@ -167,8 +167,8 @@ async function mintfunModule() {
     }
 }
 
-async function randomModule() {
-    const logger = makeLogger("Random")
+async function customModule() {
+    const logger = makeLogger("Custom modules")
     for (const [index, privateKey] of privateKeys.entries()) {
         const wallet = getEthWalletClient(privateKeyConvert(privateKey))
         let modules = generalConfig.modules
@@ -257,8 +257,8 @@ async function randomModule() {
 async function startMenu() {
     let mode = await entryPoint()
     switch (mode) {
-        case "random":
-            await randomModule()
+        case "custom":
+            await customModule()
             break
         case "base_bridge":
             await baseBridgeModule()
