@@ -192,8 +192,8 @@ async function customModule() {
             }
 
             if (modules[i] == 'zora_bridge') {
-                const bridge = new BaseBridge(privateKeyConvert(privateKey))
-                const sum = randomFloat(baseBridgeConfig.bridgeFrom, baseBridgeConfig.bridgeTo)
+                const bridge = new ZoraBridge(privateKeyConvert(privateKey))
+                const sum = randomFloat(zoraBridgeConfig.bridgeFrom, zoraBridgeConfig.bridgeTo)
                 if (await waitGas()) {
                     await bridge.bridge(sum.toString())
                 }
