@@ -1,6 +1,6 @@
 import { privateKeyConvert, readWallets } from "./utils/wallet"
 import { random, randomFloat, shuffle, sleep } from "./utils/common"
-import { baseBridgeConfig, bungeeBridgeConfig, generalConfig, transferConfig, zkBridgeConfig, zoraBridgeConfig } from "./config"
+import { baseBridgeConfig, bungeeBridgeConfig, generalConfig, starknetBridgeConfig, transferConfig, zkBridgeConfig, zoraBridgeConfig } from "./config"
 import { makeLogger } from "./utils/logger"
 import { entryPoint } from "./utils/menu"
 import { BaseBridge } from "./modules/baseBridge"
@@ -90,7 +90,7 @@ async function starknetBridgeModule() {
         }
 
         const bridge = new StarknetBridge(privateKeyConvert(privateKey), starknetAddresses[index])
-        const sum = randomFloat(zkBridgeConfig.bridgeFrom, zkBridgeConfig.bridgeTo)
+        const sum = randomFloat(starknetBridgeConfig.bridgeFrom, starknetBridgeConfig.bridgeTo)
         if (await waitGas()) {
             await bridge.bridge(sum.toString())
         }
@@ -210,7 +210,7 @@ async function customModule() {
             if (modules[i] == 'starknet_bridge') {
                 const starknetAddresses = readWallets('./addresses_starknet.txt')
                 const bridge = new StarknetBridge(privateKeyConvert(privateKey), starknetAddresses[index])
-                const sum = randomFloat(zkBridgeConfig.bridgeFrom, zkBridgeConfig.bridgeTo)
+                const sum = randomFloat(starknetBridgeConfig.bridgeFrom, starknetBridgeConfig.bridgeTo)
                 if (await waitGas()) {
                     await bridge.bridge(sum.toString())
                 }
