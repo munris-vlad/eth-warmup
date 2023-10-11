@@ -1,4 +1,4 @@
-import {formatEther, Hex, parseEther, toHex} from "viem"
+import { Hex, parseEther } from "viem"
 import { getEthWalletClient, getPublicEthClient } from "../utils/ethClient"
 import { baseBridgeAbi } from "../data/abi/base-bridge"
 import { makeLogger } from "../utils/logger"

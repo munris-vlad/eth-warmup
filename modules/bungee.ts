@@ -1,6 +1,5 @@
-import {formatEther, Hex, parseEther, toHex} from "viem"
-import { getEthWalletClient, getPublicEthClient } from "../utils/ethClient"
-import { zoraBridgeAbi } from "../data/abi/zora-bridge"
+import { Hex, parseEther } from "viem"
+import { getEthWalletClient } from "../utils/ethClient"
 import { makeLogger } from "../utils/logger"
 import { bungeeAbi } from "../data/abi/bungee"
 import { random, sleep } from "../utils/common"

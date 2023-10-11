@@ -1,4 +1,4 @@
-import { Hex, parseEther } from "viem"
+import { Hex } from "viem"
 import { getEthWalletClient } from "../utils/ethClient"
 import { makeLogger } from "../utils/logger"
 import { sleep } from "../utils/common"

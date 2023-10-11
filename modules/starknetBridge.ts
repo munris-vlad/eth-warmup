@@ -1,5 +1,5 @@
 import * as starknet from "starknet"
-import { Hex, encodeFunctionData, parseEther } from "viem"
+import { Hex, parseEther } from "viem"
 import { getEthWalletClient, getPublicEthClient } from "../utils/ethClient"
 import { makeLogger } from "../utils/logger"
 import { sleep } from "../utils/common"

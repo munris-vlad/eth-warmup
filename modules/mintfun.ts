@@ -1,7 +1,6 @@
-import {formatEther, Hex, parseEther, toHex} from "viem"
-import { getEthWalletClient, getPublicEthClient } from "../utils/ethClient"
+import { Hex } from "viem"
+import { getEthWalletClient } from "../utils/ethClient"
 import { mintfunAbi } from "../data/abi/mintfun"
-import { zerionDnaAbi } from "../data/abi/zerion-dna"
 import { makeLogger } from "../utils/logger"
 import { random, sleep } from "../utils/common"
 
@@ -10,7 +9,7 @@ export class Mintfun {
     randomContract:Hex
     contracts: Array<Hex> = [
         '0xF639B4EbB77DF1ed4b5014C244F60E72B8AdB29b',
-        // '0x932261f9Fc8DA46C4a22e31B45c4De60623848bF',
+        '0x932261f9Fc8DA46C4a22e31B45c4De60623848bF',
     ]
     logger: any
     wallet: any

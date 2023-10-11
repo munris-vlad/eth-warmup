@@ -1,4 +1,4 @@
-import {Hex, toHex} from "viem"
+import { Hex } from "viem"
 import fs from "fs"
 
 export function privateKeyConvert(privateKey: string): Hex {
