@@ -1,7 +1,7 @@
 {
   "scripts": {
     "build": "tsc",
-    "start": "node --max-old-space-size=8192 --experimental-specifier-resolution=node --loader ts-node/esm --import ./logError.js ./start.ts",
+    "start": "node --no-warnings --max-old-space-size=8192 --experimental-specifier-resolution=node --loader ts-node/esm --import ./logError.js ./start.ts",
     "lint": "eslint . --ext .ts"
   },
   "type": "module",
