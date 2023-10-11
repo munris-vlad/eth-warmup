@@ -1,9 +1,8 @@
 import * as starknet from "starknet"
-import {formatEther, formatGwei, Hex, parseEther, toHex} from "viem"
+import { Hex, encodeFunctionData, parseEther } from "viem"
 import { getEthWalletClient, getPublicEthClient } from "../utils/ethClient"
-import { zkBridgeAbi } from "../data/abi/zk-bridge"
 import { makeLogger } from "../utils/logger"
-import { random, sleep } from "../utils/common"
+import { sleep } from "../utils/common"
 import { starknetBridgeAbi } from "../data/abi/starknet-bridge"
 
 export class StarknetBridge {
@@ -60,14 +59,16 @@ export class StarknetBridge {
                     functionName: 'deposit',
                     args: [
                         value,
-                        parseInt(this.starknetAddress, 16)
+                        BigInt(this.starknetAddress)
                     ],
                     value: BigInt(Number(value)+Number(gasL2))
                 })
+
                 isSuccess = true
                 
                 this.logger.info(`${this.wallet.account.address} | Starknet bridge done: https://etherscan.io/tx/${txHash}`)
             } catch (e) {
+                console.log(e)
                 this.logger.error(`${this.wallet.account.address} | Starknet bridge error: ${e.shortMessage}`)
 
                 if (retryCount <= 3) {
