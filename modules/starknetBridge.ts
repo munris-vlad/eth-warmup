@@ -59,7 +59,7 @@ export class StarknetBridge {
                     functionName: 'deposit',
                     args: [
                         value,
-                        BigInt(this.starknetAddress)
+                        BigInt(this.starknetAddress.toLowerCase())
                     ],
                     value: BigInt(Number(value)+Number(gasL2))
                 })
