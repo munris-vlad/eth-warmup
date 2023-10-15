@@ -32,7 +32,7 @@ export class StarknetBridge {
             to_address: this.bridgeContractAddressL2,
             entry_point_selector: "handle_deposit",
             payload: [
-                this.starknetAddress,
+                this.starknetAddress.toLowerCase(),
                 amount.toString(),
                 '0'
             ],
